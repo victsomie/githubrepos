@@ -23,14 +23,15 @@ public class ProjectListViewModel extends AndroidViewModel {
     private final LiveData<List<Project>> projectListObservable;
 
     // The contructor matching super
-    public ProjectListViewModel(ProjectRepository projectRepository, @NonNull Application application) {
-        super(application);
 
+    public ProjectListViewModel(ProjectRepository projectRepository) {
+        super(projectRepository);
 
         // If any transformation is needed, this can be simply done by Transformations class ...
 
         // Below is a query to get the list of projects of the usre given in the parameter
         projectListObservable = projectRepository.getProjectList("Google");
+
     }
 
 
