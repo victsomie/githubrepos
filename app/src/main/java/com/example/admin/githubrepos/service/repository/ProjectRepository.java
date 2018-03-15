@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.util.Log;
 
 import com.example.admin.githubrepos.service.model.Project;
 
@@ -22,14 +23,13 @@ import retrofit2.Response;
  * Created by Admin on 2/17/2018.
  */
 
-public class ProjectRepository extends Application {
+public class ProjectRepository {
     private GitHubService gitHubService;
 
     public ProjectRepository(GitHubService gitHubService) {
         this.gitHubService = gitHubService;
     }
-
-
+    
 
     /*
     * This class will return a  list of the github projects of the given userId
@@ -42,6 +42,9 @@ public class ProjectRepository extends Application {
         gitHubService.getProjectList(userId).enqueue(new Callback<List<Project>>() {
             @Override
             public void onResponse(@NonNull Call<List<Project>> call, @NonNull Response<List<Project>> response) {
+                Log.e("PROJECT REPOS : >> ", data.toString());
+
+                simulateDelay();
                 data.setValue(response.body());
             }
 

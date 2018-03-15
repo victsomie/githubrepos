@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import com.example.admin.githubrepos.R;
 import com.example.admin.githubrepos.service.repository.GitHubService;
+import com.example.admin.githubrepos.service.repository.ProjectRepository;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -17,7 +18,7 @@ public class MainActivity extends AppCompatActivity implements ProjectsListFragm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        // provideGithubService();
 
 
         ProjectsListFragment projectListFragment = new ProjectsListFragment();
@@ -29,14 +30,6 @@ public class MainActivity extends AppCompatActivity implements ProjectsListFragm
         }
     }
 
-
-    GitHubService provideGithubService() {
-        return new Retrofit.Builder()
-                .baseUrl(GitHubService.HTTPS_API_GITHUB_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-                .create(GitHubService.class);
-    }
 
 
     @Override

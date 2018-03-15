@@ -1,12 +1,16 @@
 package com.example.admin.githubrepos.view.ui;
 
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +18,14 @@ import android.widget.TextView;
 
 import com.example.admin.githubrepos.R;
 import com.example.admin.githubrepos.service.model.Project;
+import com.example.admin.githubrepos.service.repository.GitHubService;
+import com.example.admin.githubrepos.service.repository.ProjectRepository;
 import com.example.admin.githubrepos.viewmodel.ProjectListViewModel;
 
 import java.util.List;
+
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,7 +34,11 @@ import java.util.List;
  * to handle interaction events.
  */
 public class ProjectsListFragment extends Fragment {
+
     ProjectListViewModel allProjects;
+    ViewModelProvider.Factory viewModelFactory;
+
+
     private OnFragmentInteractionListener mListener;
 
     public ProjectsListFragment() {
@@ -36,7 +49,7 @@ public class ProjectsListFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        allProjects = ViewModelProviders.of(this).get(ProjectListViewModel.class);
+
     }
 
 
@@ -48,13 +61,18 @@ public class ProjectsListFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_project_list, container, false);
         // DUMMY SHOWING OF DATA ON TEXTVIEW
-        final TextView tvShowAllData = (TextView) view.findViewById(R.id.loading_projects);
+        final TextView tvShowAllData =  view.findViewById(R.id.loading_projects);
 
         // GETTING THE DATA FROM THE VIEWMODEL
         // Please note how we are fetching our ViewModel from the ViewProviders.of().get(TheViewModel)
 
+        // ProjectRepository myRepo = new ProjectRepository(provideGithubService());
+        //ProjectRepository myRepo = new ProjectRepository(provideGithubService());
+        //myRepo.getProjectList("Google");
 
-        allProjects.getProjectListObservable().observe(this, new Observer<List<Project>>() {
+        // =======++++==++=+==+=+=+++++++++++========
+        /*
+        (myRepo.getProjectList("Google")).observe(this, new Observer<List<Project>>() {
             @Override
             public void onChanged(@Nullable List<Project> projects) {
 
@@ -69,6 +87,41 @@ public class ProjectsListFragment extends Fragment {
 
             }
         });
+
+        */
+        // =======++++==++=+==+=+=+++++++++++========
+
+
+        allProjects = ViewModelProviders.of(getActivity()).get(ProjectListViewModel.class);
+
+        Log.e("ProjectFragment", String.valueOf(allProjects.getProjectListObservable()));
+
+
+        // allProjects.getProjectListObservable()
+        //allProjects = ViewModelProviders.of((FragmentActivity) getContext()).get(ProjectListViewModel.class);
+
+
+        // ============================
+
+        allProjects.getProjectListObservable().observe(this, new Observer<List<Project>>() {
+            @Override
+            public void onChanged(@Nullable List<Project> projects) {
+
+                // (projects) parameter comes with all the project of the specifiew Github user
+
+                int counter = 1;
+                tvShowAllData.setText("A LIST OF ALL THE PROJECTS \n\n");
+                assert projects != null;
+                for (Project project : projects ){
+                    tvShowAllData.append(counter + " : " + project.full_name + "\n\n");
+                    counter++;
+
+                }
+
+            }
+        });
+        // ==========================================
+
 
         return view;
     }
@@ -110,5 +163,14 @@ public class ProjectsListFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+
+    GitHubService provideGithubService() {
+        return new Retrofit.Builder()
+                .baseUrl(GitHubService.HTTPS_API_GITHUB_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(GitHubService.class);
     }
 }
