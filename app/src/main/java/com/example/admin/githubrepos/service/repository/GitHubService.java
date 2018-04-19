@@ -15,7 +15,7 @@ import retrofit2.http.Path;
 public interface GitHubService {
     String HTTPS_API_GITHUB_URL = "https://api.github.com/";
 
-    @GET("users/{user}/repos")
+    @GET("users/{user}/repos?page=7&per_page=700")
     Call<List<Project>> getProjectList(@Path("user") String user);
 
     // @GET("repos/{user}/{reponame}")

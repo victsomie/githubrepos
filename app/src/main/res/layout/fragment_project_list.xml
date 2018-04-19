@@ -43,7 +43,8 @@
             android:text="@string/google_github_projects"
             android:textAlignment="center"
             android:textSize="@dimen/project_header1"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:maxLines="1000000"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/project_list"

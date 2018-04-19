@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.example.admin.githubrepos.R;
 import com.example.admin.githubrepos.service.model.Project;
 import com.example.admin.githubrepos.service.repository.GitHubService;
@@ -35,6 +37,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class ProjectsListFragment extends Fragment {
 
+    private MaterialDialog progressDialog;
+
+    private static final String TAG = ProjectsListFragment.class.getSimpleName();
     ProjectListViewModel allProjects;
     ViewModelProvider.Factory viewModelFactory;
 
@@ -53,15 +58,20 @@ public class ProjectsListFragment extends Fragment {
     }
 
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_project_list, container, false);
+
         // DUMMY SHOWING OF DATA ON TEXTVIEW
-        final TextView tvShowAllData =  view.findViewById(R.id.loading_projects);
+        final TextView tvShowAllData = view.findViewById(R.id.loading_projects);
+
+        progressDialog = new MaterialDialog.Builder(getContext())
+                .progress(true, 0)
+                .progressIndeterminateStyle(true)
+                .cancelable(false)
+                .build();
 
         // GETTING THE DATA FROM THE VIEWMODEL
         // Please note how we are fetching our ViewModel from the ViewProviders.of().get(TheViewModel)
@@ -94,7 +104,7 @@ public class ProjectsListFragment extends Fragment {
 
         allProjects = ViewModelProviders.of(getActivity()).get(ProjectListViewModel.class);
 
-        Log.e("ProjectFragment", String.valueOf(allProjects.getProjectListObservable()));
+        Log.e("ProjectListFragment", String.valueOf(allProjects.getProjectListObservable()));
 
 
         // allProjects.getProjectListObservable()
@@ -103,30 +113,57 @@ public class ProjectsListFragment extends Fragment {
 
         // ============================
 
-        allProjects.getProjectListObservable().observe(this, new Observer<List<Project>>() {
+        AsyncTask.execute(new Runnable() {
             @Override
-            public void onChanged(@Nullable List<Project> projects) {
-
-                // (projects) parameter comes with all the project of the specifiew Github user
-
-                int counter = 1;
-                tvShowAllData.setText("A LIST OF ALL THE PROJECTS \n\n");
-                assert projects != null;
-                for (Project project : projects ){
-                    tvShowAllData.append(counter + " : " + project.full_name + "\n\n");
-                    counter++;
-
-                }
-
+            public void run() {
             }
         });
+
+        progressDialog.show();
+        allProjects.getProjectListObservable().
+
+                observe(this, new Observer<List<Project>>() {
+                    @Override
+                    public void onChanged(@Nullable List<Project> projects) {
+                        //Log.e(TAG, projects + " --- That the status---");
+                        assert projects != null;
+
+
+                        Log.e(TAG, "Size outside run is ==  " + projects.size());
+                        tvShowAllData.setText("A LIST OF ALL THE PROJECTS \n\n");
+                        // (projects) parameter comes with all the project of the specifiew Github user
+
+
+                        final int[] counter = {1};
+
+                        for (Project project : projects) {
+
+                            /*
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                */
+                            //Log.e(TAG, "Size inside run is ==  " + projects.size());
+
+                            // Log some stuff
+                            //Log.e("ProjectListFragment", project.name + " ------");
+
+                            Log.e(TAG, counter[0] + " : " + project.name + "\n\n");
+                            tvShowAllData.append(counter[0] + " : " + project.name + "\n\n");
+                            counter[0]++;
+
+                        }
+                        progressDialog.dismiss();
+
+                    }
+                });
         // ==========================================
-
-
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
+// TODO: Rename method, update argument and hook method into UI event
+
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -163,6 +200,7 @@ public class ProjectsListFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+
     }
 
 
